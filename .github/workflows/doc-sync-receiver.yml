@@ -49,6 +49,9 @@ jobs:
           PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: PYTHONPATH=_bot python -m bot.doc_bot "$PAYLOAD"
 
+      - name: Remove cloned dirs from git tracking
+        run: git rm -r --cached _bot krkn-hub 2>/dev/null || true
+
       - name: Create draft PR with generated tab file
         uses: peter-evans/create-pull-request@v7
         with:
