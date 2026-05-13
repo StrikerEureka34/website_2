@@ -30,11 +30,11 @@ that can be used/set in addition to these scenario specific variables
 
 | Parameter | Description | Type | Default |
 | --------- | ----------- | ---- | ------- |
-| NAMESPACE | The Kubernetes namespace to target. | string | `openshift-etcd` |
-| LABEL_SELECTOR | Optional label selector to narrow the target resources. | string | `` |
-| RUNS | Number of times to repeat the chaos experiment. | int | `1` |
-| DELETE_COUNT | Number of resources to delete per run. | int | `1` |
-| SLEEP | Delay in seconds between actions. | int | `15` |
+| NAMESPACE | Namespace in which to inject chaos | string | `openshift-etcd` |
+| LABEL_SELECTOR | Label selector to target resources | string | `` |
+| RUNS | Number of times to run the scenario | int | `1` |
+| DELETE_COUNT | Number of resources to delete per run | int | `1` |
+| SLEEP | Seconds to wait between actions | int | `15` |
 
 **NOTE** In case of using custom metrics profile or alerts profile when
 `CAPTURE_METRICS` or `ENABLE_ALERTS` is enabled, mount the metrics profile from
