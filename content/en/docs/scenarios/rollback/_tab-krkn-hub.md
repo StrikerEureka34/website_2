@@ -30,7 +30,7 @@ that can be used/set in addition to these scenario specific variables
 
 | Parameter | Description | Type | Default |
 | --------- | ----------- | ---- | ------- |
-| RUN_UUID | A unique identifier for the current rollback operation, used to track its progress and related artifacts | string | `` |
+| RUN_UUID | Unique identifier for the run that triggers rollback | string | `` |
 
 **NOTE** In case of using custom metrics profile or alerts profile when
 `CAPTURE_METRICS` or `ENABLE_ALERTS` is enabled, mount the metrics profile from
