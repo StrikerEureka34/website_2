@@ -34,19 +34,19 @@ See list of variables that apply to all scenarios [here](/docs/scenarios/all-sce
 |  Parameter                    | Description                                                           | Type | Default
 |-------------------------------| -----------------------------------------------------------------     | ---- | ------------------------------------ |
 <!-- AUTO:START id="params" -->
-| TOTAL_CHAOS_DURATION | Total duration of chaos injection in seconds. | int | `60` |
-| NODE_SELECTOR | Node selector label to target nodes. | string | `` |
-| NAMESPACE | Kubernetes namespace to apply chaos to. | string | `default` |
-| INSTANCE_COUNT | Number of chaos pods to create. | int | `1` |
-| EXECUTION | Execution mode of chaos (parallel or sequential). | string | `parallel` |
-| INGRESS | Enable ingress network filtering. | bool | `False` |
-| EGRESS | Enable egress network filtering. | bool | `False` |
-| INTERFACES | Network interfaces to target. | string | `` |
-| PORTS | Ports to target. | string | `` |
-| PROTOCOLS | Network protocols to target (e.g., tcp). | string | `tcp` |
+| TOTAL_CHAOS_DURATION | Duration of the chaos experiment in seconds. | int | `60` |
+| NODE_SELECTOR | Node label selector to target specific nodes. | string | `` |
+| NAMESPACE | Namespace in which the experiment will be applied. | string | `default` |
+| INSTANCE_COUNT | Number of instances to inject faults into. | int | `1` |
+| EXECUTION | Execution strategy for fault injection, such as parallel or sequential. | string | `parallel` |
+| INGRESS | Whether to block inbound traffic. | bool | `False` |
+| EGRESS | Whether to block outbound traffic. | bool | `False` |
+| INTERFACES | Network interfaces to target for filtering. | string | `` |
+| PORTS | Port numbers or ranges to filter. | string | `` |
+| PROTOCOLS | Network protocols to target, e.g., tcp. | string | `tcp` |
 | NODE_NAME | Specific node name to target. | string | `` |
-| TAINT_NAME | Node taint to apply for targeting. | string | `` |
-| SERVICE_ACCOUNT | Service account to use for chaos pods. | string | `` |
+| TAINTS | Node taints to match for targeting. | string | `` |
+| SERVICE_ACCOUNT | Service account to target in the experiment. | string | `` |
 <!-- AUTO:END id="params" -->
 
 

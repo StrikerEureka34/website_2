@@ -11,19 +11,19 @@ krknctl marks `--ingress` and `--egress` as required flags (you should pass both
 | Argument          | Type    | Description                                                                 | Required | Default Value                       |
 | :---------------- | :------ | :-------------------------------------------------------------------------- | :------- | :---------------------------------- |
 <!-- AUTO:START id="params" -->
-| TOTAL_CHAOS_DURATION | Duration of chaos in seconds | int | `60` |
-| NODE_SELECTOR | Node selector expression | string | `` |
-| NODE_NAME | Specific node name to target | string | `` |
-| NAMESPACE | Kubernetes namespace to target | string | `default` |
-| INSTANCE_COUNT | Number of instances to create | int | `1` |
-| EXECUTION | Execution mode or command | string | `` |
-| INGRESS | Ingress traffic filter expression | string | `` |
-| EGRESS | Egress traffic filter expression | string | `` |
-| INTERFACES | Network interfaces to affect | string | `` |
-| PORTS | Ports to target | string | `` |
-| PROTOCOLS | Protocols to filter (e.g., tcp) | string | `tcp` |
-| TAINTs | Taints to apply to nodes | string | `` |
-| SERVICE_ACCOUNT | Service account for the scenario | string | `` |
+| TOTAL_CHAOS_DURATION | Total duration of the chaos experiment in seconds. | int | `60` |
+| NODE_SELECTOR | Node label selector for targeting nodes. | string | `` |
+| NODE_NAME | Specific node name to target. | string | `` |
+| NAMESPACE | Kubernetes namespace to apply chaos. | string | `default` |
+| INSTANCE_COUNT | Number of instances to target. | int | `1` |
+| EXECUTION | Execution mode or strategy. | string | `` |
+| INGRESS | Ingress traffic filter. | string | `` |
+| EGRESS | Egress traffic filter. | string | `` |
+| INTERFACES | Network interfaces to filter. | string | `` |
+| PORTS | Port numbers to filter. | string | `` |
+| PROTOCOLS | Protocol(s) to filter, e.g., tcp,udp. | string | `tcp` |
+| TAINTS | Node taints to apply. | string | `` |
+| SERVICE_ACCOUNT | Service account to target pods. | string | `` |
 <!-- AUTO:END id="params" -->
 
 ### Parameter Format Details
