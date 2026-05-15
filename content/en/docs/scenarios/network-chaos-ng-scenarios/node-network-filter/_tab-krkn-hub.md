@@ -33,18 +33,21 @@ See list of variables that apply to all scenarios [here](/docs/scenarios/all-sce
 
 |  Parameter                    | Description                                                           | Type | Default
 |-------------------------------| -----------------------------------------------------------------     | ---- | ------------------------------------ |
-| TOTAL_CHAOS_DURATION          | set chaos duration (in sec) as desired                                | number | 60                                  |
-| NODE_SELECTOR                 | defines the node selector for choosing target nodes. If not specified, one schedulable node in the cluster will be chosen at random. If multiple nodes match the selector, all of them will be subjected to stress.| string | "" |
-| NODE_NAME                     | the node name to target (if label selector not selected) | string |                        |
-| INSTANCE_COUNT               | restricts the number of selected nodes by the selector                                     | number | "1" |
-| EXECUTION                         | sets the execution mode of the scenario on multiple nodes, can be parallel or serial| enum |"parallel"|
-| INGRESS                       | sets the network filter on incoming traffic, can be true or false| boolean | false |
-| EGRESS                       | sets the network filter on outgoing traffic, can be true or false| boolean | false |                       
-| INTERFACES                   | a list of comma separated names of network interfaces (eg. eth0 or eth0,eth1,eth2) to filter for outgoing traffic | string | "" |
-| PORTS                        | a list of comma separated port numbers (eg 8080 or 8080,8081,8082) to filter for both outgoing and incoming traffic | string | "" |
-| PROTOCOLS                    | a list of comma separated protocols to filter (tcp, udp or both) | string |
-| TAINTS               | List of taints for which tolerations need to be created. Example: ["node-role.kubernetes.io/master:NoSchedule"] | string | [] |
-| SERVICE_ACCOUNT             | optional service account for the Node Network Filter workload | string | "" |
+<!-- AUTO:START id="params" -->
+| TOTAL_CHAOS_DURATION | Total duration of chaos injection in seconds. | int | `60` |
+| NODE_SELECTOR | Node selector label to target nodes. | string | `` |
+| NAMESPACE | Kubernetes namespace to apply chaos to. | string | `default` |
+| INSTANCE_COUNT | Number of chaos pods to create. | int | `1` |
+| EXECUTION | Execution mode of chaos (parallel or sequential). | string | `parallel` |
+| INGRESS | Enable ingress network filtering. | bool | `False` |
+| EGRESS | Enable egress network filtering. | bool | `False` |
+| INTERFACES | Network interfaces to target. | string | `` |
+| PORTS | Ports to target. | string | `` |
+| PROTOCOLS | Network protocols to target (e.g., tcp). | string | `tcp` |
+| NODE_NAME | Specific node name to target. | string | `` |
+| TAINT_NAME | Node taint to apply for targeting. | string | `` |
+| SERVICE_ACCOUNT | Service account to use for chaos pods. | string | `` |
+<!-- AUTO:END id="params" -->
 
 
 **NOTE** In case of using custom metrics profile or alerts profile when `CAPTURE_METRICS` or `ENABLE_ALERTS` is enabled, mount the metrics profile from the host on which the container is run using podman/docker under `/home/krkn/kraken/config/metrics-aggregated.yaml` and `/home/krkn/kraken/config/alerts`. For example:
