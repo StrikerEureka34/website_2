@@ -1,21 +1,25 @@
 
+#### Run
+
 ```bash
-krknctl run node-interface-down [--<parameter> <value>]
+krknctl run node-interface-down [--param=value ...]
 ```
 
-Can also set any global variable listed [here](../../all-scenario-env-krknctl.md)
+Run `krknctl describe node-interface-down` to see all available flags with their current defaults.
 
-### Node Interface Down Parameters
+#### Supported parameters
 
-| Argument             | Type    | Description                                                                                    | Required | Default Value                                    |
-| :------------------- | :------ | :--------------------------------------------------------------------------------------------- | :------- | :----------------------------------------------- |
-| `--chaos-duration`   | number  | Duration in seconds to keep the interface(s) down                                              | false    | 60                                               |
-| `--recovery-time`    | number  | Seconds to wait after bringing the interface(s) back up before continuing                      | false    | 0                                                |
-| `--node-selector`    | string  | Label selector to choose target nodes                                                          | false    | node-role.kubernetes.io/worker=                  |
-| `--node-name`        | string  | Node name to target (used when node-selector is not set)                                       | false    |                                                  |
-| `--namespace`        | string  | Namespace where the chaos workload pod will be deployed                                        | false    | default                                          |
-| `--instance-count`   | number  | Number of nodes to target from those matching the selector                                     | false    | 1                                                |
-| `--execution`        | enum    | Execution mode when targeting multiple nodes: `serial` or `parallel`                           | false    | parallel                                           |
-| `--interfaces`       | string  | Comma-separated list of interface names to bring down. Leave empty to auto-detect the default interface | false |                                             |
-| `--image`            | string  | The chaos workload container image                                                             | false    | quay.io/redhat-chaos/krkn-ng-tools:latest        |
-| `--taints`           | string  | List of taints for which tolerations need to be created                                        | false    |                                                  |
+| Parameter | Description | Type | Default |
+| --------- | ----------- | ---- | ------- |
+<!-- AUTO:START id="params" -->
+| TOTAL_CHAOS_DURATION | Total length of chaos experiment in seconds. | integer | `60` |
+| NODE_SELECTOR | Label selector for target nodes. | string | `` |
+| NODE_NAME | Specific node name to target. | string | `` |
+| NAMESPACE | Kubernetes namespace to apply chaos. | string | `default` |
+| INSTANCE_COUNT | Number of instances to affect. | integer | `1` |
+| EXECUTION | Execution mode, e.g., parallel or serial. | string | `parallel` |
+| INTERFACES | Network interfaces to bring down. | string | `` |
+| RECOVERY_TIME | Time in seconds before recovery. | integer | `0` |
+| SERVICE_ACCOUNT | Service account used for injection. | string | `` |
+| TAINTS | Node taints to apply during chaos. | string | `` |
+<!-- AUTO:END id="params" -->

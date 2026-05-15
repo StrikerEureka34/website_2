@@ -33,16 +33,18 @@ See list of variables that apply to all scenarios [here](/docs/scenarios/all-sce
 
 |  Parameter                    | Description                                                           | Default
 |-------------------------------| -----------------------------------------------------------------     | ------------------------------------ |
-| TOTAL_CHAOS_DURATION          | Duration in seconds to keep the interface(s) down                    | 60                                   |
-| RECOVERY_TIME                 | Seconds to wait after bringing the interface(s) back up              | 0                                    |
-| NODE_SELECTOR                 | Label selector to choose target nodes. If not specified, a schedulable node will be chosen at random | "node-role.kubernetes.io/worker=" |
-| NODE_NAME                     | The node name to target (used when label selector is not set)        |                                      |
-| INSTANCE_COUNT                | Restricts the number of nodes selected by the label selector         | 1                                    |
-| EXECUTION                     | Execution mode for multiple nodes: `serial` or `parallel`            | parallel                               |
-| INTERFACES                    | Comma-separated list of interface names to bring down (e.g. `eth0` or `eth0,bond0`). Leave empty to auto-detect the default interface | "" |
-| NAMESPACE                     | Namespace where the chaos workload pod will be deployed              | default                              |
-| TAINTS                        | List of taints for which tolerations need to be created. Example: `["node-role.kubernetes.io/master:NoSchedule"]` | [] |
-| SERVICE_ACCOUNT               | Optional service account for the chaos workload pod                  | "" |
+<!-- AUTO:START id="params" -->
+| TOTAL_CHAOS_DURATION | Duration of the chaos experiment in seconds. | int | `60` |
+| NODE_SELECTOR | Label selector for nodes to target the experiment. | string | `` |
+| NAMESPACE | Kubernetes namespace where the experiment will be applied. | string | `default` |
+| INSTANCE_COUNT | Number of instances of the experiment to run. | int | `1` |
+| EXECUTION | Execution strategy, e.g., parallel for multiple instances. | string | `parallel` |
+| INTERFACES | Network interfaces to target for node interface down. | string | `` |
+| RECOVERY_TIME | Time in seconds before a node is recovered after the experiment. | int | `0` |
+| NODE_NAME | Specific node name to target for the experiment. | string | `` |
+| TAINTS | Node taints to apply during the experiment. | string | `` |
+| SERVICE_ACCOUNT | Service account used by the experiment pods. | string | `` |
+<!-- AUTO:END id="params" -->
 
 
 **NOTE** In case of using custom metrics profile or alerts profile when `CAPTURE_METRICS` or `ENABLE_ALERTS` is enabled, mount the metrics profile from the host on which the container is run using podman/docker under `/home/krkn/kraken/config/metrics-aggregated.yaml` and `/home/krkn/kraken/config/alerts`. For example:

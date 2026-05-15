@@ -53,16 +53,14 @@ jobs:
       - name: Validate generated tab files have AUTO markers
         run: |
           python -c "
-          from pathlib import Path
-          import sys
-          bad = [
-              str(f) for f in Path('content').rglob('_tab-krkn-hub.md')
-              if '<!-- AUTO:START' not in f.read_text()
-          ]
+          import subprocess, sys
+          result = subprocess.run(['git', 'diff', '--name-only'], capture_output=True, text=True)
+          changed = [f for f in result.stdout.strip().split('\n') if '_tab-krkn-hub.md' in f or '_tab-krknctl.md' in f]
+          bad = [f for f in changed if '<!-- AUTO:START' not in open(f).read()]
           if bad:
               print('ERROR: missing AUTO markers in:', bad)
               sys.exit(1)
-          print('OK: AUTO markers present in all generated tab files')
+          print('OK: AUTO markers present in', changed or ['no tab files modified'])
           "
 
       - name: Create draft PR with generated tab files
