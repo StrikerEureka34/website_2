@@ -9,6 +9,34 @@ Can also set any global variable listed [here](../all-scenario-env-krknctl.md)
 Scenario specific parameters:  (be sure to scroll to right)
 | Parameter      | Description    | Type      | Required |  Default | Possible Values | 
 | ----------------------- | ----------------------    | ------------------  | :------: | ------------------------------------ | :----------------:  | 
+<!-- AUTO:START id="params" -->
+| ACTION | User-defined action to perform. | string | `` |
+| LABEL_SELECTOR | Kubernetes label selector for worker nodes. | string | `node-role.kubernetes.io/worker` |
+| EXCLUDE_LABEL | Label to exclude from the target set. | string | `` |
+| NODE_NAME | Specific node name to target. | string | `` |
+| INSTANCE_COUNT | Number of instances to target. | int | `1` |
+| RUNS | Number of times to run the scenario. | int | `1` |
+| KUBE_CHECK | Enable Kubernetes health check after actions. | bool | `True` |
+| PARALLEL | Run the scenario in parallel mode. | bool | `False` |
+| CLOUD_TYPE | Cloud provider type being used. | string | `aws` |
+| TIMEOUT | Timeout duration in seconds before aborting. | int | `180` |
+| DURATION | Duration of the chaos injection in seconds. | int | `120` |
+| VSPHERE_IP | vSphere IP address for connection. | string | `` |
+| VSPHERE_USERNAME | vSphere username for authentication. | string | `` |
+| VSPHERE_PASSWORD | vSphere password for authentication. | string | `` |
+| AWS_ACCESS_KEY_ID | AWS access key identifier. | string | `` |
+| AWS_SECRET_ACCESS_KEY | AWS secret access key. | string | `` |
+| AWS_DEFAULT_REGION | Default AWS region for operations. | string | `` |
+| BMC_USER | BMC user name for IPMI connection. | string | `` |
+| BMC_PASSWORD | BMC password for IPMI connection. | string | `` |
+| BMC_ADDR | BMC address for IPMI connection. | string | `` |
+| DISABLE_SSL_VERIFICATION | Disable SSL verification for TLS connections. | bool | `False` |
+| AZURE_TENANT_ID | Azure tenant identifier. | string | `` |
+| AZURE_CLIENT_SECRET | Azure client secret for authentication. | string | `` |
+| AZURE_CLIENT_ID | Azure client ID for authentication. | string | `` |
+| AZURE_SUBSCRIPTION_ID | Azure subscription identifier. | string | `` |
+| GOOGLE_APPLICATION_CREDENTIALS | Path to Google service account credentials file. | string | `` |
+<!-- AUTO:END id="params" -->
 `--action` | action performed on the node, visit https://github.com/krkn-chaos/krkn/blob/main/docs/node_scenarios.md for more infos | enum | Yes |  | node_start_scenario,node_stop_scenario,node_stop_start_scenario,node_termination_scenario,node_reboot_scenario,stop_kubelet_scenario,stop_start_kubelet_scenario,restart_kubelet_scenario,node_crash_scenario,stop_start_helper_node_scenario | 
 `--label-selector` | Node label to target | string | No | node-role.kubernetes.io/worker | 
 `--exclude-label` | excludes nodes marked by this label from chaos | string | No |
