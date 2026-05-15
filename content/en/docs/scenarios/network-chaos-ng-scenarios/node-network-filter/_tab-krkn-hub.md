@@ -34,19 +34,19 @@ See list of variables that apply to all scenarios [here](/docs/scenarios/all-sce
 |  Parameter                    | Description                                                           | Type | Default
 |-------------------------------| -----------------------------------------------------------------     | ---- | ------------------------------------ |
 <!-- AUTO:START id="params" -->
-| TOTAL_CHAOS_DURATION | Duration in seconds for the chaos experiment. | int | `60` |
-| NODE_SELECTOR | Node selector to target specific nodes. | string | `` |
-| NAMESPACE | Kubernetes namespace where the experiment is applied. | string | `default` |
-| INSTANCE_COUNT | Number of instances to target. | int | `1` |
-| EXECUTION | Execution mode of the chaos injection. | string | `parallel` |
-| INGRESS | Whether to filter inbound traffic. | bool | `false` |
-| EGRESS | Whether to filter outbound traffic. | bool | `false` |
-| INTERFACES | Network interface names to target. | string | `` |
-| PORTS | Port numbers to target. | string | `` |
-| PROTOCOLS | Network protocols to target. | string | `tcp` |
-| NODE_NAME | Specific node name to target. | string | `` |
-| TAINTS | Node taints to apply during the experiment. | string | `` |
-| SERVICE_ACCOUNT | Service account to use for the experiment. | string | `` |
+| TOTAL_CHAOS_DURATION | Total chaos duration in seconds to run the scenario. | int | `60` |
+| NODE_SELECTOR | Node label selector to target specific nodes. | string | `` |
+| NAMESPACE | Kubernetes namespace where the test resources will be created. | string | `default` |
+| INSTANCE_COUNT | Number of instance pods to inject chaos into. | int | `1` |
+| EXECUTION | Execution mode of the chaos workflow (e.g., parallel or serial). | string | `parallel` |
+| INGRESS | Enable ingress traffic filtering | bool | `false` |
+| EGRESS | Enable egress traffic filtering | bool | `false` |
+| INTERFACES | Network interfaces to target for chaos injection. | string | `` |
+| PORTS | Port numbers to target for chaos injection. | string | `` |
+| PROTOCOLS | Network protocols to target (e.g., tcp, udp). | string | `tcp` |
+| NODE_NAME | Specific node name to target for chaos actions. | string | `` |
+| TAINTS | Node taints to apply during the chaos experiment. | string | `` |
+| SERVICE_ACCOUNT | Service account to use for the chaos workload pods. | string | `` |
 <!-- AUTO:END id="params" -->
 
 

@@ -10,20 +10,21 @@ krknctl marks `--ingress` and `--egress` as required flags (you should pass both
 
 | Argument          | Type    | Description                                                                 | Required | Default Value                       |
 | :---------------- | :------ | :-------------------------------------------------------------------------- | :------- | :---------------------------------- |
-| `--chaos-duration`| number  | Chaos duration in seconds                                                   | false    | 60                                  |
-| `--node-selector` | string  | Node label selector (format: `key=value`)                                   | false    |                                     |
-| `--node-name`     | string  | Specific node name to target (alternative to node-selector)                 | false    |                                     |
-| `--namespace`     | string  | Namespace where the scenario container is deployed                          | false    | default                             |
-| `--instance-count`| number  | Number of nodes to target when using node-selector                          | false    | 1                                   |
-| `--execution`     | enum    | Execution mode: `parallel` or `serial`                                      | false    | parallel                            |
-| `--ingress`       | boolean | Filter incoming traffic (`true` / `false`)                                | true     |                                     |
-| `--egress`        | boolean | Filter outgoing traffic (`true` / `false`)                                  | true     |                                     |
-| `--interfaces`    | string  | Network interfaces for **outgoing** traffic (comma-separated, e.g. `eth0,eth1`). Optional; empty uses workload defaults | false    |                                     |
-| `--ports`         | string  | Network ports to filter traffic (comma-separated, e.g., `8080,8081,8082`)   | true     |                                     |
-| `--image`         | string  | The network chaos injection workload container image                        | false    | quay.io/krkn-chaos/krkn-network-chaos:latest |
-| `--protocols`     | string  | Network protocols to filter: `tcp`, `udp`, or `tcp,udp`                     | false    | tcp                                 |
-| `--taints`        | string  | Comma-separated **taints** (tolerations are derived for the workload). Same notation as elsewhere in Network Chaos NG docs, e.g. `node-role.kubernetes.io/master:NoSchedule` | false    |                                     |
-| `--service-account`| string | Service account for the workload (optional)                                 | false    |                                     |
+<!-- AUTO:START id="params" -->
+| TOTAL_CHAOS_DURATION | Total duration of the chaos injection in seconds. | int | `60` |
+| NODE_SELECTOR | Node selector label to target specific nodes. | string | `` |
+| NODE_NAME | Specific node name to target with chaos. | string | `` |
+| NAMESPACE | Kubernetes namespace where the chaos will be applied. | string | `default` |
+| INSTANCE_COUNT | Number of instances to affect with the chaos. | int | `1` |
+| EXECUTION | Specific execution mode or strategy to use. | string | `` |
+| INGRESS | Whether to inject chaos into ingress traffic. | bool | `false` |
+| EGRESS | Whether to inject chaos into egress traffic. | bool | `false` |
+| INTERFACES | Network interfaces to filter for chaos. | string | `` |
+| PORTS | Port numbers to target for chaos injection. | string | `` |
+| PROTOCOLS | Network protocols (e.g., tcp) to filter for chaos. | string | `tcp` |
+| TAINT | Node taint to apply during chaos. | string | `` |
+| SERVICE_ACCOUNT | Service account to use for chaos resources. | string | `` |
+<!-- AUTO:END id="params" -->
 
 ### Parameter Format Details
 
