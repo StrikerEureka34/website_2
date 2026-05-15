@@ -31,15 +31,15 @@ that can be used/set in addition to these scenario specific variables
 | Parameter | Description | Type | Default |
 | --------- | ----------- | ---- | ------- |
 <!-- AUTO:START id="params" -->
-| NAMESPACE | Target namespace pattern for pods, supports wildcard matching. | string | `openshift-*` |
-| POD_LABEL | Label selector for target pods, optional. | string | `` |
-| EXCLUDE_LABEL | Label selector to exclude certain pods from the scenario. | string | `` |
-| NAME_PATTERN | Regex pattern for pod names to target in the scenario. | string | `.*` |
-| DISRUPTION_COUNT | Number of pods to disrupt in this scenario. | int | `1` |
-| KILL_TIMEOUT | Maximum time (seconds) to wait for a pod to be killed. | int | `180` |
-| EXPECTED_RECOVERY_TIME | Estimated time (seconds) for disrupted pods to recover. | int | `120` |
-| NODE_LABEL_SELECTOR | Node label selector to target nodes for chaos injection. | string | `` |
-| NODE_NAMES | Explicit list of node names to target for chaos injection. | string | `` |
+| NAMESPACE | Namespace to target, supports wildcard patterns. | string | `openshift-*` |
+| POD_LABEL | Label to select pods for chaos injection. | string | `` |
+| EXCLUDE_LABEL | Label to exclude pods from chaos injection. | string | `` |
+| NAME_PATTERN | Regex pattern to match pod names. | string | `.*` |
+| DISRUPTION_COUNT | Number of pods to disrupt. | int | `1` |
+| KILL_TIMEOUT | Timeout in seconds for pod termination. | int | `180` |
+| EXPECTED_RECOVERY_TIME | Expected recovery time in seconds. | int | `120` |
+| NODE_LABEL_SELECTOR | Node label selector for targeted nodes. | string | `` |
+| NODE_NAMES | Comma-separated list of node names. | string | `` |
 <!-- AUTO:END id="params" -->
 
 **NOTE** In case of using custom metrics profile or alerts profile when
