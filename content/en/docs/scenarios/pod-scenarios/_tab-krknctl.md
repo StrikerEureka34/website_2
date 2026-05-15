@@ -12,13 +12,13 @@ Run `krknctl describe pod-scenarios` to see all available flags with their curre
 | Parameter | Description | Type | Default |
 | --------- | ----------- | ---- | ------- |
 <!-- AUTO:START id="params" -->
-| NAMESPACE | Namespace to target for chaos actions. | string | `openshift-*` |
-| NODE_NAMES | Specific node names to target (comma-separated list), if empty matches all nodes. | string | `` |
-| NODE_LABEL_SELECTOR | Node label selector to identify nodes for chaos injection. | string | `` |
-| POD_LABEL | Pod label selector to identify pods for chaos injection. | string | `` |
-| EXCLUDE_LABEL | Label to exclude from chaos actions. | string | `` |
-| NAME_PATTERN | Regex pattern to match resource names for chaos injection. | string | `.*` |
-| DISRUPTION_COUNT | Number of resources to disrupt in each iteration. | int | `1` |
-| KILL_TIMEOUT | Maximum time in seconds to wait before killing a target. | int | `180` |
-| EXPECTED_RECOVERY_TIME | Estimated time in seconds for the disrupted resource to recover. | int | `120` |
+| NAMESPACE | Target namespace for pods, defaults to openshift-* | string | `openshift-*` |
+| NODE_NAMES | Comma-separated list of node names to target, optional | string | `` |
+| NODE_LABEL_SELECTOR | Label selector to filter nodes, optional | string | `` |
+| POD_LABEL | Label to select pods for disruption, optional | string | `` |
+| EXCLUDE_LABEL | Label to exclude pods from being targeted, optional | string | `` |
+| NAME_PATTERN | Regex pattern for pod name matching, defaults to any pod | string | `.*` |
+| DISRUPTION_COUNT | Number of pods to disrupt simultaneously, defaults to 1 | int | `1` |
+| KILL_TIMEOUT | Maximum time in seconds to wait before killing a pod, defaults to 180 | int | `180` |
+| EXPECTED_RECOVERY_TIME | Estimated time in seconds for a disrupted pod to recover, defaults to 120 | int | `120` |
 <!-- AUTO:END id="params" -->
