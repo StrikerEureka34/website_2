@@ -7,7 +7,7 @@ on:
     types: [created]
 
 jobs:
-  # ── Event-driven bot (triggered by merged PR in krkn-hub) ────────────────
+  # Event-driven bot (triggered by merged PR in krkn-hub)
   sync-docs:
     if: github.event_name == 'repository_dispatch'
     runs-on: ubuntu-latest
@@ -23,7 +23,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Clone bot brain (private)
+      - name: Clone bot brain
         run: |
           git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/StrikerEureka34/krkn-docs-bot.git _bot
 
@@ -40,7 +40,8 @@ jobs:
       - name: Install bot dependencies
         run: pip install -r _bot/requirements.txt
 
-      - name: Run doc bot (writes tab file to disk)
+      - name: Run doc bot (writes tab files to disk)
+        id: run-bot
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -49,7 +50,22 @@ jobs:
           PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: PYTHONPATH=_bot python -m bot.doc_bot "$PAYLOAD"
 
-      - name: Create draft PR with generated tab file
+      - name: Validate generated tab files have AUTO markers
+        run: |
+          python -c "
+          from pathlib import Path
+          import sys
+          bad = [
+              str(f) for f in Path('content').rglob('_tab-krkn-hub.md')
+              if '<!-- AUTO:START' not in f.read_text()
+          ]
+          if bad:
+              print('ERROR: missing AUTO markers in:', bad)
+              sys.exit(1)
+          print('OK: AUTO markers present in all generated tab files')
+          "
+
+      - name: Create draft PR with generated tab files
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
@@ -57,10 +73,19 @@ jobs:
           draft: true
           title: "docs(bot): sync ${{ github.event.client_payload.scenario }} params from krkn-hub#${{ github.event.client_payload.pr_number }}"
           body: |
-            Automated documentation update triggered by krkn-hub PR #${{ github.event.client_payload.pr_number }}:
-            **"${{ github.event.client_payload.pr_title }}"**
+            ## Documentation Update
 
-            Please review the generated parameter table for accuracy before merging.
+            **Triggered by:** krkn-hub PR #${{ github.event.client_payload.pr_number }} - "${{ github.event.client_payload.pr_title }}"
+
+            **Changes generated:**
+            | Type | Count |
+            |------|-------|
+            | Parameters added | ${{ steps.run-bot.outputs.params_added }} |
+            | Defaults corrected | ${{ steps.run-bot.outputs.params_corrected }} |
+            | Parameters removed | ${{ steps.run-bot.outputs.params_removed }} |
+            | Tab files written | ${{ steps.run-bot.outputs.tabs_written }} |
+
+            Please review the generated parameter tables for accuracy before merging.
 
             Comment `/resync` to re-run the doc generation with the latest context.
 
@@ -71,7 +96,7 @@ jobs:
           branch: docs/sync-${{ github.event.client_payload.scenario }}-${{ github.run_id }}
           labels: docs-bot
 
-  # ── Interactive /fix command (triggered by issue comment) ────────────────
+  # Interactive /fix command (triggered by issue comment)
   issue-comment-fix:
     if: |
       github.event_name == 'issue_comment' &&
@@ -91,7 +116,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Clone bot brain (private)
+      - name: Clone bot brain
         run: |
           git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/StrikerEureka34/krkn-docs-bot.git _bot
 
@@ -116,6 +141,7 @@ jobs:
         run: pip install -r _bot/requirements.txt
 
       - name: Run doc bot in targeted mode
+        id: run-bot
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -127,17 +153,20 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
+          add-paths: content/
           draft: true
           title: "docs(bot): fix drift for ${{ steps.parse.outputs.scenario }}"
           body: |
             Targeted documentation fix for `${{ steps.parse.outputs.scenario }}` triggered by:
             > ${{ github.event.comment.html_url }}
 
+            **Changes:** +${{ steps.run-bot.outputs.params_added }} added, ~${{ steps.run-bot.outputs.params_corrected }} corrected, -${{ steps.run-bot.outputs.params_removed }} removed
+
             Please review the generated parameter table before merging.
           branch: docs/fix-${{ steps.parse.outputs.scenario }}-${{ github.run_id }}
           labels: docs-bot
 
-  # ── Interactive /resync command (triggered by PR comment) ────────────────
+  # Interactive /resync command (triggered by PR comment)
   issue-comment-resync:
     if: |
       github.event_name == 'issue_comment' &&
@@ -179,7 +208,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ steps.pr-info.outputs.branch }}
 
-      - name: Clone bot brain (private)
+      - name: Clone bot brain
         run: |
           git clone https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/StrikerEureka34/krkn-docs-bot.git _bot
 
@@ -209,7 +238,7 @@ jobs:
           git config user.name "krkn-docs-bot[bot]"
           git config user.email "${{ secrets.APP_ID }}+krkn-docs-bot[bot]@users.noreply.github.com"
           git add content/
-          git diff --cached --quiet || git commit -m "docs(bot): regenerate ${{ steps.pr-info.outputs.scenario }} via /resync"
+          git diff --cached --quiet || git commit -s -m "docs(bot): regenerate ${{ steps.pr-info.outputs.scenario }} via /resync"
           git push
 
       - name: Post success comment
