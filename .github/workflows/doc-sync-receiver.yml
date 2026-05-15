@@ -163,6 +163,10 @@ jobs:
             **Changes:** +${{ steps.run-bot.outputs.params_added }} added, ~${{ steps.run-bot.outputs.params_corrected }} corrected, -${{ steps.run-bot.outputs.params_removed }} removed
 
             Please review the generated parameter table before merging.
+
+            Comment `/resync` to re-run the doc generation with the latest context.
+
+            <!-- krkn-bot:scenario=${{ steps.parse.outputs.scenario }} -->
           branch: docs/fix-${{ steps.parse.outputs.scenario }}-${{ github.run_id }}
           labels: docs-bot
 
