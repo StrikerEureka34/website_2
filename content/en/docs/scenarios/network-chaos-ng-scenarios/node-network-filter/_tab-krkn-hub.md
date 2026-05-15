@@ -34,19 +34,19 @@ See list of variables that apply to all scenarios [here](/docs/scenarios/all-sce
 |  Parameter                    | Description                                                           | Type | Default
 |-------------------------------| -----------------------------------------------------------------     | ---- | ------------------------------------ |
 <!-- AUTO:START id="params" -->
-| TOTAL_CHAOS_DURATION | Total duration of the chaos experiment in seconds. | int | `60` |
-| NODE_SELECTOR | Label selector to target nodes for the experiment. | string | `` |
-| NAMESPACE | Kubernetes namespace where the experiment is applied. | string | `default` |
-| INSTANCE_COUNT | Number of instances to inject chaos into. | int | `1` |
-| EXECUTION | Execution mode of the experiment (e.g., parallel or sequential). | string | `parallel` |
-| INGRESS | Whether to block inbound traffic during the experiment. | bool | `false` |
-| EGRESS | Whether to block outbound traffic during the experiment. | bool | `false` |
-| INTERFACES | Network interfaces to target for chaos injection. | string | `` |
-| PORTS | Ports to target for chaos injection. | string | `` |
-| PROTOCOLS | Network protocols to target for chaos injection. | string | `tcp` |
-| NODE_NAME | Specific node name to target for the experiment. | string | `` |
-| TAINTS | Node taint to apply during the experiment. | string | `` |
-| SERVICE_ACCOUNT | Service account to use for executing the experiment. | string | `` |
+| TOTAL_CHAOS_DURATION | Duration of the chaos experiment in seconds. | int | `60` |
+| NODE_SELECTOR | Node label selector to target specific nodes. | string | `` |
+| NAMESPACE | Kubernetes namespace where the experiment runs. | string | `default` |
+| INSTANCE_COUNT | Number of instances to affect. | int | `1` |
+| EXECUTION | Execution mode, either parallel or sequential. | string | `parallel` |
+| INGRESS | Enable ingress traffic filtering. | bool | `False` |
+| EGRESS | Enable egress traffic filtering. | bool | `False` |
+| INTERFACES | Network interfaces to target (comma-separated list). | string | `` |
+| PORTS | Port numbers to target (comma-separated list). | string | `` |
+| PROTOCOLS | Network protocols to filter (comma-separated list). | string | `tcp` |
+| NODE_NAME | Specific node name to target. | string | `` |
+| TAINTS | Node taints to apply during the experiment. | string | `` |
+| SERVICE_ACCOUNT | Service account to use for the experiment. | string | `` |
 <!-- AUTO:END id="params" -->
 
 
