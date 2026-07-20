@@ -12,13 +12,10 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   drift:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout website
         uses: actions/checkout@v4
@@ -36,7 +33,17 @@ jobs:
       - name: Install docs bot
         run: pip install "git+https://github.com/StrikerEureka34/krkn-docs-bot-gh-aw.git@feat/drift-report"
 
+      # Post the issue as the krkn-docs-bot app, not github-actions[bot].
+      - name: Mint app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Scan and post the docs-drift issue
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           python -m bot.drift_scanner \
             --krkn-hub krkn-hub \
