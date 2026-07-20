@@ -1,0 +1,45 @@
+name: Docs drift report
+
+# Weekly, report-only scan of parameter drift for the krkn-hub and krknctl sources.
+# Posts or updates one rolling docs-drift issue with a checklist per scenario, each
+# finding linking the exact file and a suggested fix. Opens no PRs. Fixing is done
+# by commenting /fix <scenario> on the issue, which drives the Doc Sync workflow.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout website
+        uses: actions/checkout@v4
+
+      - name: Checkout krkn-hub (source of truth)
+        uses: actions/checkout@v4
+        with:
+          repository: StrikerEureka34/krkn-hub
+          path: krkn-hub
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install docs bot
+        run: pip install "git+https://github.com/StrikerEureka34/krkn-docs-bot-gh-aw.git@feat/drift-report"
+
+      - name: Scan and post the docs-drift issue
+        run: |
+          python -m bot.drift_scanner \
+            --krkn-hub krkn-hub \
+            --website . \
+            --repo "${{ github.repository }}" \
+            --hub-url https://github.com/StrikerEureka34/krkn-hub/blob/main
