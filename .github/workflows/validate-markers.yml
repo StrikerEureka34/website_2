@@ -1,0 +1,46 @@
+name: Validate scenario markers
+
+# Guard for krkn-chaos/website#545: every <krkn-hub-scenario id="..."> marker in
+# the scenario docs must resolve to a real scenario folder in krkn-hub. The id is
+# what the docs-sync bot uses to map a website page to its krkn-hub source, so an
+# unresolvable id silently breaks automated updates.
+
+on:
+  pull_request:
+    paths:
+      - 'content/en/docs/scenarios/**'
+      - '.github/workflows/validate-markers.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-markers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout krkn-hub (source of truth)
+        uses: actions/checkout@v4
+        with:
+          repository: krkn-chaos/krkn-hub
+          path: krkn-hub
+
+      - name: Validate krkn-hub-scenario markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          valid="$(mktemp)"
+          find krkn-hub -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -u > "$valid"
+          bad=0
+          while IFS= read -r match; do
+            file="${match%%:*}"; rest="${match#*:}"; lineno="${rest%%:*}"
+            id="$(printf '%s' "$match" | sed -E 's/.*id="([^"]+)".*/\1/')"
+            if ! grep -qxF "$id" "$valid"; then
+              echo "::error file=$file,line=$lineno::krkn-hub-scenario marker id=\"$id\" has no matching krkn-hub scenario folder"
+              bad=$((bad + 1))
+            fi
+          done < <(grep -rEno '<krkn-hub-scenario id="[^"]+"' content/en/docs/scenarios)
+          if [ "$bad" -gt 0 ]; then
+            echo "FAIL: $bad marker(s) point to a krkn-hub scenario that does not exist" >&2
+            exit 1
+          fi
+          echo "OK: all krkn-hub-scenario markers resolve to a krkn-hub folder"
