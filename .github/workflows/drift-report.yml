@@ -20,18 +20,26 @@ jobs:
       - name: Checkout website
         uses: actions/checkout@v4
 
-      - name: Checkout krkn-hub (source of truth)
+      - name: Checkout krkn-hub (per-scenario and global env.sh)
         uses: actions/checkout@v4
         with:
           repository: StrikerEureka34/krkn-hub
           path: krkn-hub
+
+      # Global krknctl params live in krkn, not krkn-hub. Without this the bot
+      # refuses to run rather than silently emitting a degraded skip list.
+      - name: Checkout krkn (global krknctl params)
+        uses: actions/checkout@v4
+        with:
+          repository: StrikerEureka34/krkn
+          path: krkn
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install docs bot
-        run: pip install "git+https://github.com/StrikerEureka34/krkn-docs-bot-gh-aw.git@feat/drift-report"
+        run: pip install "git+https://github.com/StrikerEureka34/krkn-docs-bot-gh-aw.git@main"
 
       # Post the issue as the krkn-docs-bot app, not github-actions[bot].
       - name: Mint app token
@@ -47,6 +55,7 @@ jobs:
         run: |
           python -m bot.drift_scanner \
             --krkn-hub krkn-hub \
+            --krkn krkn \
             --website . \
             --repo "${{ github.repository }}" \
             --hub-url https://github.com/StrikerEureka34/krkn-hub/blob/main
