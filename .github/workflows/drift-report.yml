@@ -58,4 +58,5 @@ jobs:
             --krkn krkn \
             --website . \
             --repo "${{ github.repository }}" \
-            --hub-url https://github.com/StrikerEureka34/krkn-hub/blob/main
+            --hub-url https://github.com/StrikerEureka34/krkn-hub/blob/main \
+            --krkn-url https://github.com/StrikerEureka34/krkn/blob/main
