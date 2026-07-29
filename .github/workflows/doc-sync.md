@@ -80,8 +80,9 @@ steps:
         echo "Generating: $target"
         case "$target" in
           globals)
-            # One file per group under data/params/globals/
-            python3 -m bot.globals --krkn-hub "$KRKN_HUB_PATH" --krkn "$KRKN_PATH" ;;
+            # One file per source under data/params/globals/, then replace the
+            # tables on the two global pages with group-filtered shortcode calls.
+            python3 -m bot.globals --krkn-hub "$KRKN_HUB_PATH" --krkn "$KRKN_PATH" --scaffold ;;
           *)
             python3 -m bot.doc_bot --scenario "$target" --scaffold ;;
         esac
