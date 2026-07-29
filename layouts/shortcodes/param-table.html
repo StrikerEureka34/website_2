@@ -11,6 +11,9 @@
 {{- $scenario := .Get "scenario" -}}
 {{- $source := .Get "source" -}}
 {{- $group := .Get "group" -}}
+{{/* prefix is prepended to every name. The krknctl pages pass "--" because the
+     source stores the bare flag name but a reader types --telemetry-enabled. */}}
+{{- $prefix := .Get "prefix" | default "" -}}
 {{- $data := false -}}
 {{- with site.Data.params -}}{{- $data = index . $scenario $source -}}{{- end -}}
 {{- if or (not $data) (not $data.params) -}}
@@ -41,13 +44,19 @@
   </thead>
   <tbody>
     {{- range $rows }}
+    {{- $d := "" -}}{{- with index . "default" }}{{ $d = printf "%v" . }}{{ end -}}
     <tr>
-      <td>{{ index . "name" }}</td>
+      <td><code>{{ $prefix }}{{ index . "name" }}</code></td>
       <td>{{ index . "description" | markdownify }}</td>
-      {{- if $showType }}<td>{{ index . "type" }}</td>{{ end }}
-      {{- if $showValues }}<td>{{ delimit (index . "possible_values" | default slice) ", " }}</td>{{ end }}
-      {{- if $showDefault }}<td>{{ if isset . "default" }}{{ index . "default" }}{{ end }}</td>{{ end }}
-      {{- if $showRequired }}<td>{{ if isset . "required" }}{{ index . "required" }}{{ end }}</td>{{ end }}
+      {{- if $showType }}<td>{{ index . "type" | default "-" }}</td>{{ end }}
+      {{- if $showValues }}<td>{{ with index . "possible_values" }}{{ delimit . "/" }}{{ else }}-{{ end }}</td>{{ end }}
+      {{/* Long defaults (TELEMETRY_FILTER_PATTERN is a ~250 char regex array)
+           would wreck the layout, so show the head and keep the rest on hover. */}}
+      {{- if $showDefault }}<td{{ if gt (len $d) 60 }} title="{{ $d }}"{{ end }}>
+        {{- if eq $d "" }}-{{ else if gt (len $d) 60 }}<code>{{ substr $d 0 60 }}...</code>
+        {{- else }}<code>{{ $d }}</code>{{ end -}}
+      </td>{{ end }}
+      {{- if $showRequired }}<td>{{ if isset . "required" }}{{ index . "required" }}{{ else }}-{{ end }}</td>{{ end }}
     </tr>
     {{- end }}
   </tbody>
