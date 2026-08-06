@@ -574,9 +574,9 @@ jobs:
           GH_AW_STEPS_SCN_OUTPUTS_SCENARIOS: ${{ steps.scn.outputs.scenarios }}
           KRKN_HUB_PATH: ${{ runner.temp }}/krkn-hub
           KRKN_PATH: ${{ runner.temp }}/krkn
-          OPENAI_API_KEY: ${{ secrets.COPILOT_GITHUB_TOKEN }}
-          OPENAI_BASE_URL: https://api.githubcopilot.com
-          OPENAI_MODEL: gpt-4o-mini
+          OPENAI_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENAI_BASE_URL: https://openrouter.ai/api/v1
+          OPENAI_MODEL: nvidia/nemotron-3-nano-30b-a3b:free
         name: Generate parameter data and scaffold
         run: |
           for target in $GH_AW_STEPS_SCN_OUTPUTS_SCENARIOS; do
