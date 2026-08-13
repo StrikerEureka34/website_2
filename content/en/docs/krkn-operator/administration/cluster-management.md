@@ -27,3 +27,8 @@ Once registered, clusters become available for assignment to groups through [Use
 ![Add New Target](/images/krkn-operator/add-new-target.png)
 
 ![Target Clusters](/images/krkn-operator/targets.png)
+
+---
+
+**API reference:** {{< crd-ref crd="krknoperatortargets" >}} &ensp; {{< crd-ref crd="krkntargetrequests" >}}
+

@@ -57,3 +57,8 @@ Enable the Resiliency Score on a workflow to measure application resilience:
 4. **View the score** in the [Jobs](../jobs/) page alongside the graph run results
 
 The PromQL file defines which metrics to evaluate (latency, error rate, throughput, etc.) and their expected thresholds. The score reflects how closely the application maintained its expected behavior under chaos.
+
+---
+
+**API reference:** {{< crd-ref crd="krkngraphruns" >}}
+

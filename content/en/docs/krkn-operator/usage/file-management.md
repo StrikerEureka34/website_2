@@ -34,3 +34,8 @@ Files are created by **pasting content** into the text input box — there is no
 | [Run Scenarios](../run-scenarios/) | Mount as configuration file during scenario parameter setup |
 | [Chaos Studio](../chaos-studio/) | Mount as configuration file on individual nodes |
 | [Chaos Studio](../chaos-studio/) — Resiliency Score | Mount as PromQL query file for resiliency score calculation |
+
+---
+
+**API reference:** {{< crd-ref crd="krknfiletypes" >}}
+

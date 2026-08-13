@@ -25,3 +25,8 @@ Configure target providers that integrate with external cluster management platf
 {{% notice info %}}
 The provider configuration interface is designed to be extensible. As new integration operators are developed, their configuration panels will appear automatically in this section.
 {{% /notice %}}
+
+---
+
+**API reference:** {{< crd-ref crd="krknoperatortargetproviders" >}} &ensp; {{< crd-ref crd="krknoperatortargetproviderconfigs" >}}
+
