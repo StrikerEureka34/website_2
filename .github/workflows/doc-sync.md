@@ -19,9 +19,19 @@ on:
 
 permissions: read-all
 
+# TEMP NVIDIA NIM TEST, 2026-08-17. Revert after the run.
+# Original block:
+#   engine:
+#     id: copilot
+#     model: gpt-4o-mini
+# BYOK: COPILOT_PROVIDER_BASE_URL and _API_KEY are the two vars gh-aw allows to
+# carry a secret under strict mode, and a literal base URL is auto-allowlisted.
 engine:
   id: copilot
-  model: gpt-4o-mini
+  model: nvidia/nemotron-3.5-lightning-30b-a3b
+  env:
+    COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
+    COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
 
 steps:
   - name: Checkout website
@@ -86,9 +96,13 @@ steps:
       # model; the fork overrides all three to Copilot, which is what it already
       # authenticates against. The operator source needs none of this: its CRDs
       # describe every field, so that target never reaches the model rung.
-      LLM_BASE_URL: https://api.githubcopilot.com
-      LLM_API_KEY: ${{ secrets.COPILOT_GITHUB_TOKEN }}
-      LLM_MODEL: gpt-4o
+      # TEMP NVIDIA NIM TEST, 2026-08-17. Revert after the run. Originals:
+      #   LLM_BASE_URL: https://api.githubcopilot.com
+      #   LLM_API_KEY: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+      #   LLM_MODEL: gpt-4o
+      LLM_BASE_URL: https://integrate.api.nvidia.com/v1
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_MODEL: nvidia/nemotron-3.5-lightning-30b-a3b
     run: |
       for target in ${{ steps.scn.outputs.scenarios }}; do
         echo "Generating: $target"
@@ -155,6 +169,12 @@ max-turns: 3
 timeout-minutes: 15
 
 safe-outputs:
+  # TEMP NVIDIA NIM TEST, 2026-08-17: off for this run only, restore by deleting
+  # this line. It reuses the engine, so leaving it on doubles the NIM traffic and
+  # makes a detection failure look identical to an agent failure.
+  # Note: this key sits under safe-outputs, not under create-pull-request. The
+  # comment below said otherwise and was wrong; fix it when reverting.
+  threat-detection: false
   github-app:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.APP_PRIVATE_KEY }}
