@@ -26,12 +26,17 @@ permissions: read-all
 #     model: gpt-4o-mini
 # BYOK: COPILOT_PROVIDER_BASE_URL and _API_KEY are the two vars gh-aw allows to
 # carry a secret under strict mode, and a literal base URL is auto-allowlisted.
+# The proxy gates on the model name: modelAliases allows only copilot/*,
+# anthropic/*, openai/*, google/* and gemini/*. nvidia/* matches none, so it
+# returned a bare 400 without calling NVIDIA. Name an allowlisted model here and
+# put the real one on the wire.
 engine:
   id: copilot
-  model: nvidia/nemotron-3.5-lightning-30b-a3b
+  model: openai/gpt-4o
   env:
     COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
     COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
+    COPILOT_PROVIDER_MODEL_ID: nvidia/nemotron-3.5-lightning-30b-a3b
 
 steps:
   - name: Checkout website
