@@ -19,52 +19,34 @@ on:
 
 permissions: read-all
 
-# TEMP NVIDIA NIM TEST, 2026-08-17. Revert after the run.
-# Original block:
-#   engine:
-#     id: copilot
-#     model: gpt-4o-mini
-#
-# Modelled on gh-aw's own working BYOK example, gh-aw-firewall
-# .github/workflows/smoke-copilot-byok-aoai-apikey.md, rather than assembled
-# from prose. Earlier attempts failed because the api-proxy steers the model
-# before the call leaves the runner: github/gh-aw#50113, open, says
-# enableTokenSteering is always on, undocumented and not overridable.
-#
-# Hypothesis under test: Copilot CLI resolves per-model capabilities from its
-# own catalog (see COPILOT_PROVIDER_MAX_PROMPT_TOKENS, "otherwise resolved from
-# model catalog"), and withholds tool definitions for a model it does not know.
-# So name a catalog-known model for capability lookup and send the real one on
-# the wire. Decisive check: does "tools" appear in the logged Wire request.
-# TEMP NVIDIA NIM TEST, 2026-08-17. Revert after the run.
-# Original: engine: { id: copilot, model: gpt-4o-mini }
-#
-# The proxy steers the model before the call leaves the runner, so nvidia/* is
-# refused with a bare 400. sandbox.agent.token-steering: false is the documented
-# remedy but only exists from gh-aw v0.84.4; we run v0.80.9, and
-# sandbox.agent.model-fallback is not released in any version yet. So use
-# gpt-oss-120b, which NVIDIA genuinely hosts and whose name also clears the gate.
-# Revisit after a gh-aw upgrade to run the real Nemotron model.
 engine:
   id: copilot
-  # 20b not 120b: the 120b took 171s to answer a 25k-token prompt on NVIDIA's
-  # free tier, and one call hit ECONNRESET after 290s. The agent's output is
-  # discarded anyway, it only has to not time out.
-  model: openai/gpt-oss-20b
-  env:
-    COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
-    COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
-    COPILOT_PROVIDER_TYPE: openai
+  model: gpt-4o-mini
 
-# Every working gh-aw example declares tools. Ours never did.
-tools:
-  bash: ["*"]
+# NVIDIA PATH 1 of 3, disabled 2026-08-18. To swap: comment the engine above,
+# uncomment this, and do the same at NVIDIA PATH 2 and 3.
+# The api-proxy permits only copilot/*, anthropic/*, openai/*, google/*,
+# gemini/*, so name one the provider also hosts. 20b not 120b: the 120b took
+# 171s on the free tier. Why the workarounds exist: github/gh-aw#50113 and
+# docs/2026-08-17-nvidia-nim-engine-check.md.
+# engine:
+#   id: copilot
+#   model: openai/gpt-oss-20b
+#   env:
+#     COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
+#     COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
+#     COPILOT_PROVIDER_TYPE: openai
+# tools:
+#   bash: ["*"]
 
 steps:
   - name: Checkout website
     uses: actions/checkout@v7
     with:
       persist-credentials: false
+  # Before Resolve scenarios, which uses bot.targets.
+  - name: Install docs bot
+    run: pip3 install "git+https://github.com/StrikerEureka34/krkn-docs-bot-gh-aw.git@main"
   - name: Resolve scenarios
     id: scn
     env:
@@ -81,8 +63,11 @@ steps:
       else
         scenarios="$(printf '%s' "$COMMENT_BODY" | awk 'NR==1{$1="";print}')"
         if [ -z "$scenarios" ] && [ -n "$PR_NUMBER" ]; then
+          # bot.targets, not a grep: a CRD plural is a group in data/params but
+          # only bot.operator regenerates it. Unit-tested, since /resync cannot
+          # be exercised on a fork.
           scenarios="$(gh api "repos/$REPO/pulls/$PR_NUMBER/files" --jq '.[].filename' 2>/dev/null \
-            | grep -oE 'data/params/[a-z0-9-]+/' | cut -d/ -f3 | sort -u | tr '\n' ' ')"
+            | python3 -m bot.targets --website .)"
         fi
       fi
       scenarios="$(echo $scenarios | tr -s ' ')"
@@ -100,8 +85,6 @@ steps:
         esac
       done
       echo "scenarios=$scenarios" >> "$GITHUB_OUTPUT"
-  - name: Install docs bot
-    run: pip3 install "git+https://github.com/StrikerEureka34/krkn-docs-bot-gh-aw.git@main"
   - name: Clone krkn-hub source
     run: git clone --depth 1 https://github.com/StrikerEureka34/krkn-hub.git "$RUNNER_TEMP/krkn-hub"
   - name: Clone krkn source
@@ -118,18 +101,15 @@ steps:
       KRKN_PATH: ${{ runner.temp }}/krkn
       KRKN_OPERATOR_PATH: ${{ runner.temp }}/krkn-operator
       GH_AW_REPORT_DIR: ${{ runner.temp }}
-      # Custom steps run before the firewall is installed, so this needs no
-      # network.allowed entry. The bot's built-in endpoint is the project's own
-      # model; the fork overrides all three to Copilot, which is what it already
-      # authenticates against. The operator source needs none of this: its CRDs
-      # describe every field, so that target never reaches the model rung.
-      # TEMP NVIDIA NIM TEST, 2026-08-17. Revert after the run. Originals:
-      #   LLM_BASE_URL: https://api.githubcopilot.com
-      #   LLM_API_KEY: ${{ secrets.COPILOT_GITHUB_TOKEN }}
-      #   LLM_MODEL: gpt-4o
-      LLM_BASE_URL: https://integrate.api.nvidia.com/v1
-      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-      LLM_MODEL: nvidia/nemotron-3.5-lightning-30b-a3b
+      # Runs before the firewall is installed, so no network.allowed entry.
+      # The operator target never reaches the model: its CRDs describe themselves.
+      LLM_BASE_URL: https://api.githubcopilot.com
+      LLM_API_KEY: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+      LLM_MODEL: gpt-4o
+      # NVIDIA PATH 2 of 3, disabled 2026-08-18. Swap with the three above.
+      # LLM_BASE_URL: https://integrate.api.nvidia.com/v1
+      # LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      # LLM_MODEL: nvidia/nemotron-3.5-lightning-30b-a3b
     run: |
       for target in ${{ steps.scn.outputs.scenarios }}; do
         echo "Generating: $target"
@@ -186,46 +166,40 @@ steps:
       # injection point here; a heredoc body is not.
       cat "$RUNNER_TEMP/gaps.md" >> "$RUNNER_TEMP/commit-msg.txt" 2>/dev/null || true
       git commit -s -F "$RUNNER_TEMP/commit-msg.txt" || echo "no changes to commit"
-  - name: Request the pull request
-    env:
-      RUN_NUMBER: ${{ github.run_number }}
-    run: |
-      # The safe_outputs job opens the PR by reading NDJSON from this file. The
-      # agent was only ever meant to write this one line, with a title and body
-      # the prompt already fixed. Copilot CLI in BYOK mode never sends tool
-      # definitions to a custom provider, verified across five runs from the
-      # CLI's own "Wire request" debug log, so it cannot call the tool at all.
-      #
-      # This runs before the agent, which is deliberate: post-steps compile in
-      # after "Ingest agent output" reads the file, so a write there is too late.
-      # Nothing truncates the file in between.
-      OUT="${GH_AW_SAFE_OUTPUTS:-${RUNNER_TEMP}/gh-aw/safeoutputs/outputs.jsonl}"
-      mkdir -p "$(dirname "$OUT")"
-      python3 - >> "$OUT" <<'SAFE_OUTPUT'
-      import json, os
-      print(json.dumps({
-          "type": "create_pull_request",
-          "branch": "docs-sync-" + os.environ["RUN_NUMBER"],
-          "title": "Regenerate parameter tables",
-          "body": (
-              "Parameter tables regenerated from source. The commit message "
-              "lists the targets, the file counts and the source files.\n\n"
-              "These files are generated. Edit the source, not the table."
-          ),
-      }))
-      SAFE_OUTPUT
-
-      # gh-aw needs two inputs, not one: the item above supplies the branch,
-      # title and body, and this patch supplies the file changes. AWF normally
-      # writes it while tearing the agent container down, so a failed agent
-      # means no patch and no pull request even when the item is perfect.
-      # It is just format-patch over the commit we made, so write it here and
-      # the run stops depending on the agent at all.
-      SLUG="$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]' | tr '/' '-')"
-      mkdir -p /tmp/gh-aw
-      git format-patch -1 HEAD --stdout \
-        > "/tmp/gh-aw/aw-${SLUG}-docs-sync-${RUN_NUMBER}.patch"
-      echo "requested a pull request for docs-sync-${RUN_NUMBER}"
+  # NVIDIA PATH 3 of 3, disabled 2026-08-18. Uncomment this whole step when
+  # swapping, and note it must stay in steps: not post-steps:, which compile in
+  # after "Ingest agent output" has already read the file.
+  #
+  # It replaces the agent: gh-aw needs two inputs, the NDJSON item for branch,
+  # title and body, and a patch for the file changes. On Copilot the agent
+  # supplies the item and AWF the patch, but in BYOK mode Copilot CLI sends no
+  # tool definitions, so the agent cannot call the tool at all.
+  #
+  # - name: Request the pull request
+  #   env:
+  #     RUN_NUMBER: ${{ github.run_number }}
+  #   run: |
+  #     OUT="${GH_AW_SAFE_OUTPUTS:-${RUNNER_TEMP}/gh-aw/safeoutputs/outputs.jsonl}"
+  #     mkdir -p "$(dirname "$OUT")"
+  #     python3 - >> "$OUT" <<'SAFE_OUTPUT'
+  #     import json, os
+  #     print(json.dumps({
+  #         "type": "create_pull_request",
+  #         "branch": "docs-sync-" + os.environ["RUN_NUMBER"],
+  #         "title": "Regenerate parameter tables",
+  #         "body": (
+  #             "Parameter tables regenerated from source. The commit message "
+  #             "lists the targets, the file counts and the source files.\n\n"
+  #             "These files are generated. Edit the source, not the table."
+  #         ),
+  #     }))
+  #     SAFE_OUTPUT
+  #
+  #     SLUG="$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]' | tr '/' '-')"
+  #     mkdir -p /tmp/gh-aw
+  #     git format-patch -1 HEAD --stdout \
+  #       > "/tmp/gh-aw/aw-${SLUG}-docs-sync-${RUN_NUMBER}.patch"
+  #     echo "requested a pull request for docs-sync-${RUN_NUMBER}"
 
 network:
   allowed:
@@ -236,19 +210,13 @@ max-turns: 3
 timeout-minutes: 15
 
 safe-outputs:
-  # TEMP NVIDIA NIM TEST, 2026-08-17: off for this run only, restore by deleting
-  # this line. It reuses the engine, so leaving it on doubles the NIM traffic and
-  # makes a detection failure look identical to an agent failure.
-  # Note: this key sits under safe-outputs, not under create-pull-request. The
-  # comment below said otherwise and was wrong; fix it when reverting.
-  threat-detection: false
+  # Threat detection is on. It reuses the engine, so turn it off when swapping to
+  # a rate-limited provider: `threat-detection: false`, here under safe-outputs
+  # and not under create-pull-request.
   github-app:
     app-id: ${{ vars.APP_ID }}
     private-key: ${{ secrets.APP_PRIVATE_KEY }}
   create-pull-request:
-    # Threat detection (a separate ~68k-token LLM scan) runs by default and is
-    # kept ON for the mentor demo. To disable it for this workflow, add:
-    #   threat-detection: false
     target-repo: "StrikerEureka34/website_2"
     draft: true
     title-prefix: "[docs-sync] "
