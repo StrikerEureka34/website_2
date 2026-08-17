@@ -214,6 +214,17 @@ steps:
           ),
       }))
       SAFE_OUTPUT
+
+      # gh-aw needs two inputs, not one: the item above supplies the branch,
+      # title and body, and this patch supplies the file changes. AWF normally
+      # writes it while tearing the agent container down, so a failed agent
+      # means no patch and no pull request even when the item is perfect.
+      # It is just format-patch over the commit we made, so write it here and
+      # the run stops depending on the agent at all.
+      SLUG="$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]' | tr '/' '-')"
+      mkdir -p /tmp/gh-aw
+      git format-patch -1 HEAD --stdout \
+        > "/tmp/gh-aw/aw-${SLUG}-docs-sync-${RUN_NUMBER}.patch"
       echo "requested a pull request for docs-sync-${RUN_NUMBER}"
 
 network:
