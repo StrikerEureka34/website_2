@@ -36,13 +36,17 @@ permissions: read-all
 # model catalog"), and withholds tool definitions for a model it does not know.
 # So name a catalog-known model for capability lookup and send the real one on
 # the wire. Decisive check: does "tools" appear in the logged Wire request.
+# Single-variable test against the gpt-oss-120b run: the only difference is the
+# tools: block below. claude-haiku-4.5 was rejected 400 by the proxy because it
+# carries no provider prefix, so it never reached NVIDIA and told us nothing.
+# gpt-oss-120b is a real NVIDIA model whose name also clears the gate, so no
+# wire-model rewrite is needed.
 engine:
   id: copilot
   env:
     COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
     COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
-    COPILOT_MODEL: claude-haiku-4.5
-    COPILOT_PROVIDER_WIRE_MODEL: nvidia/nemotron-3.5-lightning-30b-a3b
+    COPILOT_MODEL: openai/gpt-oss-120b
     COPILOT_PROVIDER_TYPE: openai
 
 # Every working gh-aw example declares tools. Ours never did.
