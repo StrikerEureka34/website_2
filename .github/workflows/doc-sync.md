@@ -24,19 +24,30 @@ permissions: read-all
 #   engine:
 #     id: copilot
 #     model: gpt-4o-mini
-# BYOK: COPILOT_PROVIDER_BASE_URL and _API_KEY are the two vars gh-aw allows to
-# carry a secret under strict mode, and a literal base URL is auto-allowlisted.
-# gh-aw's api-proxy gates on the model name and allows only copilot/*,
-# anthropic/*, openai/*, google/* and gemini/*. So nvidia/* is refused with a
-# bare 400 before the call leaves the runner, and COPILOT_PROVIDER_MODEL_ID is
-# ignored on v0.80.9. gpt-oss-120b is a real NVIDIA-hosted model whose name
-# happens to match openai/*, so it satisfies the gate and the provider both.
+#
+# Modelled on gh-aw's own working BYOK example, gh-aw-firewall
+# .github/workflows/smoke-copilot-byok-aoai-apikey.md, rather than assembled
+# from prose. Earlier attempts failed because the api-proxy steers the model
+# before the call leaves the runner: github/gh-aw#50113, open, says
+# enableTokenSteering is always on, undocumented and not overridable.
+#
+# Hypothesis under test: Copilot CLI resolves per-model capabilities from its
+# own catalog (see COPILOT_PROVIDER_MAX_PROMPT_TOKENS, "otherwise resolved from
+# model catalog"), and withholds tool definitions for a model it does not know.
+# So name a catalog-known model for capability lookup and send the real one on
+# the wire. Decisive check: does "tools" appear in the logged Wire request.
 engine:
   id: copilot
-  model: openai/gpt-oss-120b
   env:
     COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
     COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
+    COPILOT_MODEL: claude-haiku-4.5
+    COPILOT_PROVIDER_WIRE_MODEL: nvidia/nemotron-3.5-lightning-30b-a3b
+    COPILOT_PROVIDER_TYPE: openai
+
+# Every working gh-aw example declares tools. Ours never did.
+tools:
+  bash: ["*"]
 
 steps:
   - name: Checkout website
