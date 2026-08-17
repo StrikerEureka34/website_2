@@ -36,17 +36,21 @@ permissions: read-all
 # model catalog"), and withholds tool definitions for a model it does not know.
 # So name a catalog-known model for capability lookup and send the real one on
 # the wire. Decisive check: does "tools" appear in the logged Wire request.
-# Single-variable test against the gpt-oss-120b run: the only difference is the
-# tools: block below. claude-haiku-4.5 was rejected 400 by the proxy because it
-# carries no provider prefix, so it never reached NVIDIA and told us nothing.
-# gpt-oss-120b is a real NVIDIA model whose name also clears the gate, so no
-# wire-model rewrite is needed.
+# TEMP NVIDIA NIM TEST, 2026-08-17. Revert after the run.
+# Original: engine: { id: copilot, model: gpt-4o-mini }
+#
+# The proxy steers the model before the call leaves the runner, so nvidia/* is
+# refused with a bare 400. sandbox.agent.token-steering: false is the documented
+# remedy but only exists from gh-aw v0.84.4; we run v0.80.9, and
+# sandbox.agent.model-fallback is not released in any version yet. So use
+# gpt-oss-120b, which NVIDIA genuinely hosts and whose name also clears the gate.
+# Revisit after a gh-aw upgrade to run the real Nemotron model.
 engine:
   id: copilot
+  model: openai/gpt-oss-120b
   env:
     COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
     COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
-    COPILOT_MODEL: openai/gpt-oss-120b
     COPILOT_PROVIDER_TYPE: openai
 
 # Every working gh-aw example declares tools. Ours never did.
@@ -179,6 +183,35 @@ steps:
       # injection point here; a heredoc body is not.
       cat "$RUNNER_TEMP/gaps.md" >> "$RUNNER_TEMP/commit-msg.txt" 2>/dev/null || true
       git commit -s -F "$RUNNER_TEMP/commit-msg.txt" || echo "no changes to commit"
+  - name: Request the pull request
+    env:
+      RUN_NUMBER: ${{ github.run_number }}
+    run: |
+      # The safe_outputs job opens the PR by reading NDJSON from this file. The
+      # agent was only ever meant to write this one line, with a title and body
+      # the prompt already fixed. Copilot CLI in BYOK mode never sends tool
+      # definitions to a custom provider, verified across five runs from the
+      # CLI's own "Wire request" debug log, so it cannot call the tool at all.
+      #
+      # This runs before the agent, which is deliberate: post-steps compile in
+      # after "Ingest agent output" reads the file, so a write there is too late.
+      # Nothing truncates the file in between.
+      OUT="${GH_AW_SAFE_OUTPUTS:-${RUNNER_TEMP}/gh-aw/safeoutputs/outputs.jsonl}"
+      mkdir -p "$(dirname "$OUT")"
+      python3 - >> "$OUT" <<'SAFE_OUTPUT'
+      import json, os
+      print(json.dumps({
+          "type": "create_pull_request",
+          "branch": "docs-sync-" + os.environ["RUN_NUMBER"],
+          "title": "Regenerate parameter tables",
+          "body": (
+              "Parameter tables regenerated from source. The commit message "
+              "lists the targets, the file counts and the source files.\n\n"
+              "These files are generated. Edit the source, not the table."
+          ),
+      }))
+      SAFE_OUTPUT
+      echo "requested a pull request for docs-sync-${RUN_NUMBER}"
 
 network:
   allowed:
