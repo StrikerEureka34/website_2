@@ -47,7 +47,10 @@ permissions: read-all
 # Revisit after a gh-aw upgrade to run the real Nemotron model.
 engine:
   id: copilot
-  model: openai/gpt-oss-120b
+  # 20b not 120b: the 120b took 171s to answer a 25k-token prompt on NVIDIA's
+  # free tier, and one call hit ECONNRESET after 290s. The agent's output is
+  # discarded anyway, it only has to not time out.
+  model: openai/gpt-oss-20b
   env:
     COPILOT_PROVIDER_BASE_URL: https://integrate.api.nvidia.com/v1
     COPILOT_PROVIDER_API_KEY: ${{ secrets.LLM_API_KEY }}
