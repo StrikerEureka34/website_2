@@ -53,7 +53,7 @@
       {{/* The krknctl pages list CLI flags; name stays the env var in the data
            so drift_scanner and the skip list keep matching on it. */}}
       <td><code>{{ $prefix }}{{ if isset . "flag" }}{{ index . "flag" }}{{ else }}{{ index . "name" }}{{ end }}</code></td>
-      <td>{{ index . "description" | markdownify }}</td>
+      <td>{{ $.Page.RenderString (index . "description") }}</td>
       {{- if $showType }}<td>{{ index . "type" | default "-" }}{{ if isset . "secret" }} (secret){{ end }}</td>{{ end }}
       {{/* Long defaults (TELEMETRY_FILTER_PATTERN is a ~250 char regex array)
            would wreck the layout, so show the head and keep the rest on hover. */}}
