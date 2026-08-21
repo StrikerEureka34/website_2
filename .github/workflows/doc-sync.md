@@ -1,7 +1,7 @@
 ---
 # Source workflow, compiled to doc-sync.lock.yml by `gh aw compile`.
 # All deterministic work runs in the custom steps below, before the agent.
-# The agent only commits the generated files and opens the pull request.
+# Under BYOK the agent does nothing at all: see NVIDIA PATH 3.
 
 on:
   slash_command:
@@ -34,7 +34,7 @@ tools:
   bash: ["*"]
 
 # Copilot instead. To swap: comment the engine above, uncomment this, and do
-# the same at NVIDIA PATH 2 and 3.
+# the same at NVIDIA PATH 2, 3 and 4.
 # engine:
 #   id: copilot
 #   model: gpt-4o-mini
@@ -75,6 +75,16 @@ steps:
         echo "no scenario given" >&2
         exit 1
       fi
+      # /resync updates the pull request it was called on, so the run regenerates
+      # on top of that branch. Digits only: the number reaches a git refspec.
+      if [ "$(printf '%s' "$COMMENT_BODY" | awk 'NR==1{print $1}')" = "/resync" ]; then
+        case "$PR_NUMBER" in
+          ''|*[!0-9]*)
+            echo "/resync needs a pull request number" >&2
+            exit 1 ;;
+          *) echo "resync_pr=$PR_NUMBER" >> "$GITHUB_OUTPUT" ;;
+        esac
+      fi
       # Targets are scenario ids plus the literal "globals". Both fit a-z0-9-,
       # so this guard stays exactly as strict as before.
       for s in $scenarios; do
@@ -85,6 +95,16 @@ steps:
         esac
       done
       echo "scenarios=$scenarios" >> "$GITHUB_OUTPUT"
+  # Without this a resync regenerates against main, and safe-outputs then has to
+  # three-way that patch onto a branch already holding the previous run's tables.
+  # The data files recover as add/add, the tab pages conflict and the push fails.
+  - name: Check out the pull request branch on resync
+    if: steps.scn.outputs.resync_pr != ''
+    env:
+      PR_NUMBER: ${{ steps.scn.outputs.resync_pr }}
+    run: |
+      git fetch origin "refs/pull/$PR_NUMBER/head:resync"
+      git checkout resync
   - name: Clone krkn-hub source
     run: git clone --depth 1 https://github.com/StrikerEureka34/krkn-hub.git "$RUNNER_TEMP/krkn-hub"
   - name: Clone krkn source
@@ -132,6 +152,7 @@ steps:
       # carries one merged table instead of a heading per target.
       python3 -m bot.report
   - name: Commit generated files to a branch
+    id: commit
     env:
       TARGETS: ${{ steps.scn.outputs.scenarios }}
     run: |
@@ -167,7 +188,12 @@ steps:
       # substituted into the script before bash parses it, which is the real
       # injection point here; a heredoc body is not.
       cat "$RUNNER_TEMP/gaps.md" >> "$RUNNER_TEMP/commit-msg.txt" 2>/dev/null || true
-      git commit -s -F "$RUNNER_TEMP/commit-msg.txt" || echo "no changes to commit"
+      if git commit -s -F "$RUNNER_TEMP/commit-msg.txt"; then
+        echo "committed=true" >> "$GITHUB_OUTPUT"
+      else
+        echo "no changes to commit"
+        echo "committed=false" >> "$GITHUB_OUTPUT"
+      fi
   # NVIDIA PATH 3 of 3, active 2026-08-20. Stays in steps: not post-steps:,
   # which compile in after "Ingest agent output" has already read the file.
   #
@@ -178,28 +204,49 @@ steps:
   - name: Request the pull request
     env:
       RUN_NUMBER: ${{ github.run_number }}
+      RESYNC_PR: ${{ steps.scn.outputs.resync_pr }}
+      COMMITTED: ${{ steps.commit.outputs.committed }}
     run: |
       OUT="${GH_AW_SAFE_OUTPUTS:-${RUNNER_TEMP}/gh-aw/safeoutputs/outputs.jsonl}"
       mkdir -p "$(dirname "$OUT")"
+      # push_to_pull_request_branch resolves the branch from the triggering pull
+      # request, so it needs no branch here. git am keeps the patch's own commit
+      # message, which is where the gaps table and the sign-off live.
       python3 - >> "$OUT" <<'SAFE_OUTPUT'
       import json, os
-      print(json.dumps({
-          "type": "create_pull_request",
-          "branch": "docs-sync-" + os.environ["RUN_NUMBER"],
-          "title": "Regenerate parameter tables",
-          "body": (
-              "Parameter tables regenerated from source. The commit message "
-              "lists the targets, the file counts and the source files.\n\n"
-              "These files are generated. Edit the source, not the table."
-          ),
-      }))
+      run = os.environ["RUN_NUMBER"]
+      if os.environ.get("RESYNC_PR"):
+          item = {"type": "push_to_pull_request_branch",
+                  "message": "docs-sync: regenerate parameter tables"}
+      else:
+          item = {
+              "type": "create_pull_request",
+              "branch": "docs-sync-" + run,
+              "title": "Regenerate parameter tables",
+              "body": (
+                  "Parameter tables regenerated from source. The commit message "
+                  "lists the targets, the file counts and the source files.\n\n"
+                  "These files are generated. Edit the source, not the table."
+              ),
+          }
+      print(json.dumps(item))
       SAFE_OUTPUT
 
       SLUG="$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]' | tr '/' '-')"
       mkdir -p /tmp/gh-aw
-      git format-patch -1 HEAD --stdout \
-        > "/tmp/gh-aw/aw-${SLUG}-docs-sync-${RUN_NUMBER}.patch"
-      echo "requested a pull request for docs-sync-${RUN_NUMBER}"
+      PATCH="/tmp/gh-aw/aw-${SLUG}-docs-sync-${RUN_NUMBER}.patch"
+      # An empty patch is the documented no-op. Without this guard a run that
+      # generated nothing would ship the branch's previous commit instead.
+      if [ "$COMMITTED" = "true" ]; then
+        git format-patch -1 HEAD --stdout > "$PATCH"
+      else
+        : > "$PATCH"
+      fi
+      if [ -n "$RESYNC_PR" ]; then
+        echo "requested a push to PR #$RESYNC_PR (committed=$COMMITTED)"
+      else
+        echo "requested a pull request for docs-sync-$RUN_NUMBER (committed=$COMMITTED)"
+      fi
 
 network:
   allowed:
@@ -223,29 +270,26 @@ safe-outputs:
     max: 1
   push-to-pull-request-branch:
     target-repo: "StrikerEureka34/website_2"
+
+# NVIDIA PATH 4 of 4, active 2026-08-21. The body tells the agent to do nothing,
+# because PATH 3 already wrote the item and BYOK sends no tool definitions. Swapping
+# back to Copilot restores the tools, so the body must go back to instructing the
+# call. Recover it with: git log -p -- .github/workflows/doc-sync.md
 ---
 
 # Doc Sync
 
-Earlier workflow steps already regenerated the changed krkn-chaos scenarios' parameter data files, injected the shortcode, and committed everything to the branch `docs-sync-${{ github.run_number }}`. Your only job is to open a single pull request for that branch. Do not run git or any other command.
+This run is already finished. Earlier steps regenerated the parameter data files,
+injected the shortcode, committed everything to `docs-sync-${{ github.run_number }}`,
+and wrote the `create_pull_request` item to the safe outputs file. There is no work
+left for you.
 
-The triggering command was `${{ needs.pre_activation.outputs.matched_command }}`.
+The safe-output requirement above is already satisfied. Do not call
+`create_pull_request`, `push_to_pull_request_branch` or any other tool: this engine
+runs BYOK, which sends no tool definitions, so a call cannot land and each attempt
+spends one of the run's three allowed model invocations. Do not run git, bash or any
+command. Never read or log secrets.
 
-Call exactly one safe-output tool:
-- if the triggering command was `resync`, call `push_to_pull_request_branch` to update the existing pull request.
-- otherwise call `create_pull_request` with `branch` set to `docs-sync-${{ github.run_number }}`.
+Reply with this one line and stop:
 
-Set `title` to exactly `Regenerate parameter tables` and `body` to exactly the three
-lines below. Copy them character for character. Do not summarise them, do not add a
-file list, do not add counts, do not add anything else.
-
-```
-Parameter tables regenerated from source. The commit message lists the targets, the file counts and the source files.
-
-These files are generated. Edit the source, not the table.
-```
-
-Every fact about this run already lives in the commit message, which was written
-deterministically and is visible in the diff. You do not need to restate it.
-
-You must call exactly one safe-output tool before finishing. Never read or log secrets.
+The pull request for `docs-sync-${{ github.run_number }}` was already requested.
