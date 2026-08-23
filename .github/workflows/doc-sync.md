@@ -51,8 +51,10 @@ steps:
     id: scn
     env:
       DISPATCH_SCENARIOS: ${{ github.event.inputs.scenarios }}
-      COMMENT_BODY: ${{ github.event.comment.body }}
-      PR_NUMBER: ${{ github.event.issue.number }}
+      # Normalized across every trigger shape; a bare comment.body is empty
+      # when the command is the issue/PR/discussion body itself.
+      COMMENT_BODY: ${{ needs.activation.outputs.body }}
+      PR_NUMBER: ${{ github.event.pull_request.number || (github.event.issue.pull_request && github.event.issue.number) }}
       REPO: ${{ github.repository }}
       GH_TOKEN: ${{ github.token }}
     run: |
@@ -70,7 +72,7 @@ steps:
             | python3 -m bot.targets --website .)"
         fi
       fi
-      scenarios="$(echo $scenarios | tr -s ' ')"
+      scenarios="$(printf '%s' "$scenarios" | tr -s ' ')"
       if [ -z "$scenarios" ]; then
         echo "no scenario given" >&2
         exit 1
@@ -188,11 +190,16 @@ steps:
       # substituted into the script before bash parses it, which is the real
       # injection point here; a heredoc body is not.
       cat "$RUNNER_TEMP/gaps.md" >> "$RUNNER_TEMP/commit-msg.txt" 2>/dev/null || true
-      if git commit -s -F "$RUNNER_TEMP/commit-msg.txt"; then
-        echo "committed=true" >> "$GITHUB_OUTPUT"
-      else
+      # Test for an empty index rather than reading the commit's exit code. Both
+      # report "nothing to commit" as a non-zero exit, so keying off the exit
+      # code turns a genuine commit failure (a hook, a bad author, a full disk)
+      # into a green run that silently ships nothing.
+      if git diff --cached --quiet; then
         echo "no changes to commit"
         echo "committed=false" >> "$GITHUB_OUTPUT"
+      else
+        git commit -s -F "$RUNNER_TEMP/commit-msg.txt"
+        echo "committed=true" >> "$GITHUB_OUTPUT"
       fi
   # NVIDIA PATH 3 of 3, active 2026-08-20. Stays in steps: not post-steps:,
   # which compile in after "Ingest agent output" has already read the file.
