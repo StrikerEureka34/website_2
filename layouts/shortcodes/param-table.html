@@ -15,7 +15,9 @@
      source stores the bare flag name but a reader types --telemetry-enabled. */}}
 {{- $prefix := .Get "prefix" | default "" -}}
 {{- $data := false -}}
-{{- with site.Data.params -}}{{- $data = index . $scenario $source -}}{{- end -}}
+{{- with site.Data.params -}}
+  {{- with index . $scenario -}}{{- $data = index . $source -}}{{- end -}}
+{{- end -}}
 {{- if or (not $data) (not $data.params) -}}
   {{- errorf "param-table: no data for scenario=%q source=%q (expected data/params/%s/%s.yaml)" $scenario $source $scenario $source -}}
 {{- else -}}
