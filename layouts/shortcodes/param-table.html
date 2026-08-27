@@ -31,7 +31,10 @@
     {{- if isset . "type" }}{{ $showType = true }}{{ end -}}
     {{- if isset . "possible_values" }}{{ $showValues = true }}{{ end -}}
     {{- if isset . "default" }}{{ $showDefault = true }}{{ end -}}
-    {{- if isset . "required" }}{{ $showRequired = true }}{{ end -}}
+    {{/* Value, not presence, unlike the others. Every env.sh param carries
+         required: false, and a column reading No on every row is noise the
+         hand-written tables never had. */}}
+    {{- if and (isset . "required") (index . "required") }}{{ $showRequired = true }}{{ end -}}
   {{- end -}}
 <table class="krkn-param-table">
   <thead>
@@ -39,8 +42,9 @@
       <th>Parameter</th>
       <th>Description</th>
       {{- if $showType }}<th>Type</th>{{ end }}
-      {{- if $showDefault }}<th>Default</th>{{ end }}
+      {{/* Required before Default: the order the hand-written tables use. */}}
       {{- if $showRequired }}<th>Required</th>{{ end }}
+      {{- if $showDefault }}<th>Default</th>{{ end }}
       {{- if $showValues }}<th>Possible Values</th>{{ end }}
     </tr>
   </thead>
@@ -57,15 +61,17 @@
       <td><code>{{ $prefix }}{{ if isset . "flag" }}{{ index . "flag" }}{{ else }}{{ index . "name" }}{{ end }}</code></td>
       <td>{{ $.Page.RenderString (index . "description") }}</td>
       {{- if $showType }}<td>{{ index . "type" | default "-" }}{{ if isset . "secret" }} (secret){{ end }}</td>{{ end }}
+      {{- if $showRequired }}<td>{{ if isset . "required" }}{{ if index . "required" }}True{{ else }}False{{ end }}{{ else }}-{{ end }}</td>{{ end }}
       {{/* Long defaults (TELEMETRY_FILTER_PATTERN is a ~250 char regex array)
-           would wreck the layout, so show the head and keep the rest on hover. */}}
+           would wreck the layout, so show the head and keep the rest on hover.
+           Plain text like the hand-written tables, except for an empty string,
+           which is invisible without the quotes and is not the same as "none". */}}
       {{- if $showDefault }}<td{{ if gt (len $d) 60 }} title="{{ $d }}"{{ end }}>
         {{- if not $hasDefault }}-
         {{- else if eq $d "" }}<code>""</code>
-        {{- else if gt (len $d) 60 }}<code>{{ substr $d 0 60 }}...</code>
-        {{- else }}<code>{{ $d }}</code>{{ end -}}
+        {{- else if gt (len $d) 60 }}{{ substr $d 0 60 }}...
+        {{- else }}{{ $d }}{{ end -}}
       </td>{{ end }}
-      {{- if $showRequired }}<td>{{ if isset . "required" }}{{ if index . "required" }}Yes{{ else }}No{{ end }}{{ else }}-{{ end }}</td>{{ end }}
       {{/* Blank, not a dash: two thirds of rows are non-enum. Default keeps its
            dash, where it means "no default declared" rather than default: "". */}}
       {{- if $showValues }}<td>{{ with index . "possible_values" }}{{ delimit . "/" }}{{ end }}</td>{{ end }}
