@@ -57,8 +57,9 @@
     {{- $d := "" -}}{{- if $hasDefault }}{{ $d = printf "%v" (index . "default") }}{{ end -}}
     <tr>
       {{/* The krknctl pages list CLI flags; name stays the env var in the data
-           so drift_scanner and the skip list keep matching on it. */}}
-      <td><code>{{ $prefix }}{{ if isset . "flag" }}{{ index . "flag" }}{{ else }}{{ index . "name" }}{{ end }}</code></td>
+           so drift_scanner and the skip list keep matching on it.
+           Plain text, not code: the hand-written tables write the name bare. */}}
+      <td>{{ $prefix }}{{ if isset . "flag" }}{{ index . "flag" }}{{ else }}{{ index . "name" }}{{ end }}</td>
       <td>{{ $.Page.RenderString (index . "description") }}</td>
       {{- if $showType }}<td>{{ index . "type" | default "-" }}{{ if isset . "secret" }} (secret){{ end }}</td>{{ end }}
       {{- if $showRequired }}<td>{{ if isset . "required" }}{{ if index . "required" }}True{{ else }}False{{ end }}{{ else }}-{{ end }}</td>{{ end }}
