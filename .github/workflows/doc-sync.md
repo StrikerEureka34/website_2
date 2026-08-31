@@ -152,8 +152,8 @@ steps:
             # regenerating all of them costs nothing.
             python3 -m bot.operator --operator "$KRKN_OPERATOR_PATH" --website . --scaffold ;;
           krkn-ai)
-            # One target for the whole CLI: the three commands share a data file
-            # and the shortcode filters on the command name.
+            # One target for both sources: the CLI describes itself, the config
+            # model mostly does not and reaches the model.
             python3 -m bot.krkn_ai --krkn-ai "$KRKN_AI_PATH" --website . --scaffold ;;
           *)
             python3 -m bot.doc_bot --scenario "$target" --scaffold ;;
@@ -190,7 +190,7 @@ steps:
       - krkn-hub/env.sh and each scenario's krknctl-input.json
       - krkn/containers/krknctl-input.json for the global parameters
       - krkn-operator/config/crd/bases for the crd-reference pages
-      - krkn-ai/krkn_ai/cli/cmd.py for the CLI option tables
+      - krkn-ai/krkn_ai/cli/cmd.py and models/config.py for the krkn-ai tables
 
       These files are derived. Edit the source, not the table.
 
@@ -242,7 +242,7 @@ steps:
       # in git log. globals and operator are literal targets rather than scenario
       # directories, so they are spelled out; everything else is already readable.
       alias = {"globals": "global parameters", "operator": "krkn-operator CRDs",
-               "krkn-ai": "krkn-ai CLI options"}
+               "krkn-ai": "krkn-ai CLI and config"}
       names = [alias.get(t, t) for t in os.environ.get("TARGETS", "").split()]
       what = names[0] if len(names) == 1 else ", ".join(names)
       # Two bounds. Three names covers every multi-scenario push in krkn-hub's
