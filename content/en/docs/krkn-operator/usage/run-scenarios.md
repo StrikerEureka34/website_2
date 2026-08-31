@@ -66,3 +66,7 @@ Review a summary of all configured parameters before execution.
 ### 7. Run
 
 Launch the scenario. You are redirected to the [Jobs](../jobs/) page where you can monitor the execution in real time.
+
+---
+
+**API reference:** {{< crd-ref crd="krknscenarioruns" >}}
