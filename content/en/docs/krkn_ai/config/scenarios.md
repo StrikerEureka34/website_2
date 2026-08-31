@@ -68,3 +68,7 @@ scenario:
   storage-throttle:
     enable: false
 ```
+
+## Reference
+
+{{< param-table scenario="krkn-ai" source="config" group="scenario" >}}

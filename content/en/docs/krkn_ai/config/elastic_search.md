@@ -35,3 +35,7 @@ In addition to the standard Krkn telemetry and metrics indices, Krkn-AI creates 
 - `krkn-ai-results`: Stores the results of each Krkn-AI run, such as fitness scores, health check evaluations, and related metrics.
 
 **Note:** Depending on the complexity and number of scenarios executed, Krkn-AI can generate a significant amount of metrics and data per run. Ensure that your Elasticsearch deployment is sized appropriately to handle this volume.
+
+## Reference
+
+{{< param-table scenario="krkn-ai" source="config" group="elastic" >}}
