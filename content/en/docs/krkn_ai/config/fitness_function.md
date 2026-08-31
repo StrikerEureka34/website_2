@@ -118,3 +118,6 @@ Results from application health checks are also incorporated into the fitness sc
 
 - **Use-Case Driven**: The fitness function query should be defined based on your use case. If you want to optimize your cluster for maximum uptime, a good fitness function could be to capture restart counts or the number of unavailable pods. Similarly, if you are interested in optimizing your cluster to ensure no downtime due to resource constraints, a good fitness function would be to measure the maximum CPU or memory percentage.
 
+## Reference
+
+{{< param-table scenario="krkn-ai" source="config" group="fitness_function" >}}

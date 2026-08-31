@@ -63,3 +63,7 @@ fitness_function:
     include_health_check_failure: false
     include_health_check_response_time: false
 ```
+
+## Reference
+
+{{< param-table scenario="krkn-ai" source="config" group="health_checks" >}}
