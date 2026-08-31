@@ -160,3 +160,6 @@ The following fields remain at the top level of the config file (outside the `ge
 
 Time to wait after scenario execution. Sets Krkn's `--wait-duration` parameter. (Default: 120 seconds)
 
+## Reference
+
+{{< param-table scenario="krkn-ai" source="config" group="genetic" >}}
