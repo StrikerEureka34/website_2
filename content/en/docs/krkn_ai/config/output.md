@@ -51,3 +51,7 @@ With this configuration, files will be named like:
 - `gen_0_scenario_1_pod_scenarios.yaml`
 - `gen_0_scenario_1_pod_scenarios.png`
 - `gen_0_scenario_1_pod_scenarios.log`
+
+## Reference
+
+{{< param-table scenario="krkn-ai" source="config" group="output" >}}

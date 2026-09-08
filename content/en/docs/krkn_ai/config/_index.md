@@ -37,3 +37,7 @@ cluster_components:
 > **Backward compatibility:** Config files using the old flat layout (GA fields at root level) are still supported — they are automatically migrated on load.
 
 See the subsections below for detailed documentation of each config block.
+
+## Reference
+
+{{< param-table scenario="krkn-ai" source="config" group="general" >}}
