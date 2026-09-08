@@ -13,24 +13,9 @@ $ uv run krkn_ai discover --help
 Usage: krkn_ai discover [OPTIONS]
 
   Discover components for Krkn-AI tests
-
-Options:
-  -k, --kubeconfig TEXT   Path to cluster kubeconfig file.
-  -o, --output TEXT       Path to save config file.
-  -n, --namespace TEXT    Namespace(s) to discover components in. Supports
-                          Regex and comma separated values.
-  -pl, --pod-label TEXT   Pod Label Keys(s) to filter. Supports Regex and
-                          comma separated values.
-  -nl, --node-label TEXT  Node Label Keys(s) to filter. Supports Regex and
-                          comma separated values.
-  -v, --verbose           Increase verbosity of output.
-  --skip-pod-name TEXT    Pod name to skip. Supports comma separated values
-                          with regex.
-  --save-strategy [skip|overwrite|merge]
-                          How to save: skip, overwrite (replace), or merge
-                          (add new).
-  --help                  Show this message and exit.
 ```
+
+{{< param-table scenario="krkn-ai" source="cli" group="discover" prefix="--" >}}
 
 ### Example
 
