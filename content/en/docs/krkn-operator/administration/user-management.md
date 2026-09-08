@@ -60,3 +60,7 @@ Group "SRE Team"
         ├── alice → can run scenarios on production-us, production-eu
         └── bob   → can run scenarios on production-us, production-eu
 ```
+
+---
+
+**API reference:** {{< crd-ref crd="krknusers" >}} &ensp; {{< crd-ref crd="krknusergroups" >}}
